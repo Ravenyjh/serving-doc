@@ -7,13 +7,13 @@ sidebar_position: 2
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-To integrate a service into the 0G Serving Network, a provider must transform their service into a **verifiable service** and connect it through the **provider broker container**.
+To integrate a service into the 0G Serving Network, you need to transform your service into a **verifiable service** and connect it through the **provider broker container**.
 
 ## Verifiable Services
 
 ### Service Interface Requirements
 
-Your service must adhere to the [OpenAI API Interface Standards](https://platform.openai.com/docs/api-reference/chat).
+Your service need to adhere to the [OpenAI API Interface Standards](https://platform.openai.com/docs/api-reference/chat).
 
 ### Verification Interfaces
 
@@ -41,7 +41,7 @@ This endpoint should return a JSON structure in the following format:
 }
 ```
 
-_Note_: Ensure that the "nvidia_payload" can be verified using NVIDIA's [GPU Attestation API](https://docs.attestation.nvidia.com/api-docs/nras.html#tag--GPU-Attestation-API).
+_Note_: Ensure that the "nvidia_payload" can be verified using NVIDIA's [GPU Attestation API](https://docs.attestation.nvidia.com/api-docs/nras.html#post-/v3/attest/gpu).
 
 #### 2. Signature Download Interface
 
@@ -65,7 +65,7 @@ Under construction...
 
 ## Provider Broker
 
-The Provider Broker registers and manages services, proxies user requests, and provides settlement endpoints.
+To register and manage services, handle user request proxies, and offer settlement endpoints, you should use the Provider Broker.
 
 ### Prerequisites
 
@@ -123,7 +123,7 @@ docker compose -f provider-broker/docker-compose.yml up -d
    curl -X POST http://127.0.0.1:3080/v1/settle
    ```
 
-   - The provider broker has an automatic settlement engine that ensures efficient fee collection, minimizing users' overdue payments. Users may request refunds, which are temporarily locked during processing. Additionally, the engine manages settlement frequency to control gas costs.
+   - The provider broker has an automatic settlement engine that ensures you can collect fees promptly before your customer's account balance is insufficient, while also minimizing the frequency of charges to reduce gas consumption.
 
 ### Additional API Information
 
