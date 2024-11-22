@@ -3,11 +3,13 @@ id: da-integration
 title: Setting Up DA Client Nodes
 sidebar_position: 2
 ---
+
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
 # 0G Data Availability (DA): Integration
-----
+
+---
 
 To submit data to the 0G DA, you must run a DA Client node and the Encoder node. The DA client interfaces with the Encoder for data encoding and the Retriever for data access.
 
@@ -27,26 +29,26 @@ See example here https://github.com/0glabs/0g-da-example-rust/blob/main/src/disp
 
 The following table outlines the hardware requirements for different types of DA Client nodes:
 
-| Node Type | Memory | CPU | Disk | Bandwidth | Additional Notes |
-|-----------|--------|-----|------|-----------|------------------|
-| DA Client | 8 GB | 2 cores | - | 100 MBps | For Download / Upload |
-| DA Encoder | - | - | - | - | NVIDIA Drivers: 12.04 on the RTX 4090* |
-| DA Retriever | 8 GB | 2 cores | - | 100 MBps | For Download / Upload |
+| Node Type    | Memory | CPU     | Disk | Bandwidth | Additional Notes                        |
+| ------------ | ------ | ------- | ---- | --------- | --------------------------------------- |
+| DA Client    | 8 GB   | 2 cores | -    | 100 MBps  | For Download / Upload                   |
+| DA Encoder   | -      | -       | -    | -         | NVIDIA Drivers: 12.04 on the RTX 4090\* |
+| DA Retriever | 8 GB   | 2 cores | -    | 100 MBps  | For Download / Upload                   |
 
 ### Standing up DA Client, Encoder, Retriever
-
 
 <Tabs>
 <TabItem value="binary" label="DA Client" default>
 
 ## DA Client Node Installation
 
-**1. Clone the DA Client Node Repo:** 
+**1. Clone the DA Client Node Repo:**
 
 ```bash
 git clone https://github.com/0glabs/0g-da-client.git
 ```
-**2. Build the Docker Image:** 
+
+**2. Build the Docker Image:**
 
 ```bash
 cd 0g-da-client
@@ -56,6 +58,7 @@ docker build -t 0g-da-client -f combined.Dockerfile .
 **3. Set Environment Variables:**
 
 Create a file named `envfile.env` with the following content. Be sure you paste in your private key.
+
 ```bash
 # envfile.env
 COMBINED_SERVER_CHAIN_RPC=https://evmrpc-testnet.0g.ai
@@ -86,48 +89,46 @@ BATCHER_ENCODING_TIMEOUT=300s
 BATCHER_SIGNING_TIMEOUT=60s
 BATCHER_CHAIN_READ_TIMEOUT=12s
 BATCHER_CHAIN_WRITE_TIMEOUT=13s
-```   
-
-
+```
 
 **4. Run the Docker Node:**
 
 ```bash
-docker run -d --env-file envfile.env --name 0g-da-client -v ./run:/runtime -p 51001:51001 0g-da-client combined 
+docker run -d --env-file envfile.env --name 0g-da-client -v ./run:/runtime -p 51001:51001 0g-da-client combined
 ```
 
 ## Configuration
 
-| Field | Description |
-|-------|-------------|
-| `--chain.rpc` | JSON RPC node endpoint for the blockchain network. |
-| `--chain.private-key` | Hex-encoded signer private key. |
-| `--chain.receipt-wait-rounds` | Maximum retries to wait for transaction receipt. |
-| `--chain.receipt-wait-interval` | Interval between retries when waiting for transaction receipt. |
-| `--chain.gas-limit` | Transaction gas limit. |
-| `--combined-server.use-memory-db` | Whether to use mem-db for blob storage. |
-| `--combined-server.storage.kv-db-path` | Path for level db. |
-| `--combined-server.storage.time-to-expire` | Expiration duration for blobs in level db. |
-| `--combined-server.log.level-file` | File log level. |
-| `--combined-server.log.level-std` | Standard output log level. |
-| `--combined-server.log.path` | Log file path. |
-| `--disperser-server.grpc-port` | Server listening port. |
-| `--disperser-server.retriever-address` | GRPC host for retriever. |
-| `--batcher.da-entrance-contract` | Hex-encoded da-entrance contract address. |
-| `--batcher.da-signers-contract` | Hex-encoded da-signers contract address. |
-| `--batcher.finalizer-interval` | Interval for finalizing operations. |
-| `--batcher.finalized-block-count` | Default number of blocks between finalized block and latest block. |
-| `--batcher.confirmer-num` | Number of Confirmer threads. |
-| `--batcher.max-num-retries-for-sign` | Number of retries before signing fails. |
-| `--batcher.batch-size-limit` | Maximum batch size in MiB. |
-| `--batcher.encoding-request-queue-size` | Size of the encoding request queue. |
-| `--batcher.encoding-interval` | Interval between blob encoding requests. |
-| `--batcher.pull-interval` | Interval for pulling from the encoded queue. |
-| `--batcher.signing-interval` | Interval between slice signing requests. |
-| `--batcher.signed-pull-interval` | Interval for pulling from the signed queue. |
-| `--encoder-socket` | GRPC host of the encoder. |
-| `--encoding-timeout` | Total time to wait for a response from encoder. |
-| `--signing-timeout` | Total time to wait for a response from signer. |
+| Field                                      | Description                                                        |
+| ------------------------------------------ | ------------------------------------------------------------------ |
+| `--chain.rpc`                              | JSON RPC node endpoint for the blockchain network.                 |
+| `--chain.private-key`                      | Hex-encoded signer private key.                                    |
+| `--chain.receipt-wait-rounds`              | Maximum retries to wait for transaction receipt.                   |
+| `--chain.receipt-wait-interval`            | Interval between retries when waiting for transaction receipt.     |
+| `--chain.gas-limit`                        | Transaction gas limit.                                             |
+| `--combined-server.use-memory-db`          | Whether to use mem-db for blob storage.                            |
+| `--combined-server.storage.kv-db-path`     | Path for level db.                                                 |
+| `--combined-server.storage.time-to-expire` | Expiration duration for blobs in level db.                         |
+| `--combined-server.log.level-file`         | File log level.                                                    |
+| `--combined-server.log.level-std`          | Standard output log level.                                         |
+| `--combined-server.log.path`               | Log file path.                                                     |
+| `--disperser-server.grpc-port`             | Server listening port.                                             |
+| `--disperser-server.retriever-address`     | GRPC host for retriever.                                           |
+| `--batcher.da-entrance-contract`           | Hex-encoded da-entrance contract address.                          |
+| `--batcher.da-signers-contract`            | Hex-encoded da-signers contract address.                           |
+| `--batcher.finalizer-interval`             | Interval for finalizing operations.                                |
+| `--batcher.finalized-block-count`          | Default number of blocks between finalized block and latest block. |
+| `--batcher.confirmer-num`                  | Number of Confirmer threads.                                       |
+| `--batcher.max-num-retries-for-sign`       | Number of retries before signing fails.                            |
+| `--batcher.batch-size-limit`               | Maximum batch size in MiB.                                         |
+| `--batcher.encoding-request-queue-size`    | Size of the encoding request queue.                                |
+| `--batcher.encoding-interval`              | Interval between blob encoding requests.                           |
+| `--batcher.pull-interval`                  | Interval for pulling from the encoded queue.                       |
+| `--batcher.signing-interval`               | Interval between slice signing requests.                           |
+| `--batcher.signed-pull-interval`           | Interval for pulling from the signed queue.                        |
+| `--encoder-socket`                         | GRPC host of the encoder.                                          |
+| `--encoding-timeout`                       | Total time to wait for a response from encoder.                    |
+| `--signing-timeout`                        | Total time to wait for a response from signer.                     |
 
   </TabItem>
   <TabItem value="source" label="DA Encoder">
@@ -257,12 +258,13 @@ Run the following script for complete testing:
 ```bash
 ./dev_support/test.sh
 ```
+
 </TabItem>
 <TabItem value="docker" label="DA Retriever">
   
 ## DA Retriever Node Installation
 
-**1. Clone the DA Retriver Node Repo:** 
+**1. Clone the DA Retriver Node Repo:**
 
 ```bash
 git clone https://github.com/0glabs/0g-da-retriever.git
@@ -272,6 +274,7 @@ cd 0g-da-retriever
 **2. Edit Files:**
 
 Add the following line to Dockerfile.dockerignore file.
+
 ```bash
 !/run/config.toml
 ```
@@ -301,6 +304,7 @@ CMD ["/usr/local/bin/retriever"]
 ```
 
 Replace the Config impl in /retriver/src/config.rs with the following:
+
 ```bash
 impl Config {
     pub fn from_cli_file() -> Result<Self> {
@@ -330,17 +334,16 @@ impl Config {
 
 Update configuration file `run/config.toml` as needed with context below.
 
-| Field | Description |
-|-------|-------------|
-| log_level | Set log level. |
-| grpc_listen_address | Server listening address. |
-| eth_rpc_endpoint | JSON RPC node endpoint for the blockchain network. |
-
+| Field               | Description                                        |
+| ------------------- | -------------------------------------------------- |
+| log_level           | Set log level.                                     |
+| grpc_listen_address | Server listening address.                          |
+| eth_rpc_endpoint    | JSON RPC node endpoint for the blockchain network. |
 
 **4. Build and Run the Docker Node:**
 
 ```bash
-docker build -t 0g-da-retriever . 
+docker build -t 0g-da-retriever .
 docker run -d --name 0g-da-retriever -p 34005:34005 0g-da-retriever
 ```
 

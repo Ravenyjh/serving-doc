@@ -127,4 +127,4 @@ docker compose -f provider-broker/docker-compose.yml up -d
 
 ### Additional API Information
 
-For more details, please [Download the PDF](./0G-Serving-Broker-API.pdf).
+For more details, please [Download the PDF](./data/0G-Serving-Broker-API.pdf).

@@ -10,14 +10,14 @@ import TabItem from '@theme/TabItem';
 You can integrate the services provided by our provider into their own products using our SDK.
 
 <Tabs>
-<TabItem value="ts-web" label="TS SDK for Web Dev" default>
+<TabItem value="ts-web" label="TypeScript SDK" default>
 
 ### Step 1: Install the dependency
 
 To get started, you need to install the `@0glabs/0g-serving-broker` package:
 
 ```bash
-pnpm install @0glabs/0g-serving-broker
+pnpm add @0glabs/0g-serving-broker @types/crypto-js@4.2.2 crypto-js@4.2.0
 ```
 
 ### Step 2: Initialize a Broker Instance
@@ -99,11 +99,33 @@ await broker.depositFund(providerAddress, amount);
 
 ### Step 5: Use the Provider's Services
 
-#### 5.1 Process Requests
+#### 5.1 Get Service metadata
 
 ```typescript
 /**
- * `processRequest` generates billing-related headers for the request
+ * Generates request metadata for the provider service.
+ * Includes:
+ * 1. Request endpoint for the provider service
+ * 2. Model information for the provider service
+ *
+ * @param providerAddress - The address of the provider.
+ * @param svcName - The name of the service.
+ *
+ * @returns { endpoint, model } - Object containing endpoint and model.
+ *
+ * @throws An error if errors occur during the processing of the request.
+ */
+const { endpoint, model } = await broker.getRequestMetadata(
+  providerAddress,
+  serviceName
+);
+```
+
+#### 5.2 Get Request Headers
+
+```typescript
+/**
+ * getRequestHeaders generates billing-related headers for the request
  * when the user uses the provider service.
  *
  * In the 0G Serving system, a request with valid billing headers
@@ -118,37 +140,76 @@ await broker.depositFund(providerAddress, amount);
  *
  * @throws An error if errors occur during the processing of the request.
  */
-const headers = broker.requestProcessor.processRequest(
+const headers = await broker.getRequestHeaders(
   providerAddress,
   serviceName,
   content
 );
 ```
 
-#### 5.2 Process Responses
+#### 5.3 Send Request
+
+After obtaining the `endpoint`, `model`, and `headers`, you can use client SDKs
+compatible with the OpenAI interface to make requests.
 
 ```typescript
 /**
- * `processResponse` is used after the user successfully obtains a response from the provider service.
+ * Use OpenAI TS SDK
+ */
+const openai = new OpenAI({
+  baseURL: endpoint,
+  apiKey: "",
+});
+const completion = await openai.chat.completions.create(
+  {
+    messages: [{ role: "system", content }],
+    model: model,
+  },
+  {
+    headers: {
+      ...headers,
+    },
+  }
+);
+
+/**
+ * Use fetch
+ */
+await fetch(`${endpoint}/chat/completions`, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    ...headers,
+  },
+  body: JSON.stringify({
+    messages: [{ role: "system", content }],
+    model: model,
+  }),
+});
+```
+
+#### 5.4 Process Responses
+
+```typescript
+/**
+ * processResponse is used after the user successfully obtains a response from the provider service.
  *
- * `processResponse` extracts necessary information from the response and records it
- * in localStorage for generating billing headers for subsequent requests.
- *
- * Additionally, if the service is verifiable, input the chat ID from the response and
- * `processResponse` will determine the validity of the returned content by checking the
- * provider service's response and corresponding signature corresponding to the chat ID.
+ * It will settle the fee for the response content. Additionally, if the service is verifiable,
+ * input the chat ID from the response and processResponse will determine the validity of the
+ * returned content by checking the provider service's response and corresponding signature associated
+ * with the chat ID.
  *
  * @param providerAddress - The address of the provider.
  * @param svcName - The name of the service.
  * @param content - The main content returned by the service. For example, in the case of a chatbot service,
  * it would be the response text.
- * @param chatID - Only for verifiable service. You can fill in the chat ID obtained from response to
+ * @param chatID - Only for verifiable services. You can provide the chat ID obtained from the response to
  * automatically download the response signature. The function will verify the reliability of the response
  * using the service's signing address.
  *
  * @returns A boolean value. True indicates the returned content is valid, otherwise it is invalid.
  *
- * @throws An error if errors occur during the processing of the response.
+ * @throws An error if any issues occur during the processing of the response.
  */
 const valid = broker.processResponse(
   providerAddress,
@@ -158,7 +219,8 @@ const valid = broker.processResponse(
 );
 ```
 
-By following these steps, you can effectively integrate provider services into their applications.
+By following these steps, you can effectively integrate provider services into your applications.
+For more information, please [download the example](./data/ts-sdk-example.ts).
 
 </TabItem>
 
