@@ -7,20 +7,20 @@ sidebar_position: 2
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-To integrate a service into the 0G Serving Network, you need to transform your service into a **verifiable service** and connect it through the **provider broker container**.
+To integrate a service into the 0G Compute Network, you need to transform your service into a **verifiable service** and connect it through the **provider broker container**.
 
 ## Verifiable Services
 
 ### Service Interface Requirements
 
-Your service need to adhere to the [OpenAI API Interface Standards](https://platform.openai.com/docs/api-reference/chat).
+Your service needs to adhere to one of the available interface standards, with our first version supporting the [OpenAI API Interface Standards](https://platform.openai.com/docs/api-reference/chat). More options will be available soon.
 
 ### Verification Interfaces
 
 To ensure the integrity and trustworthiness of services, different verification mechanisms are employed. Each mechanism comes with its own specific set of protocols and requirements to ensure service verification and security.
 
 <Tabs>
-<TabItem value="tee" label="TEE" default>
+<TabItem value="TEEML" label="TEEML" default>
 
 For TEE (Trusted Execution Environment) verification, when a service starts, it should generate a signing key within the TEE. We require CPU and GPU attestations to ensure the service is running in a Confidential VM with an NVIDIA GPU in TEE mode. These attestations should include the public key of the signing key, verifying its creation within the TEE. All inference results must be signed with this signing key.
 
@@ -41,7 +41,7 @@ This endpoint should return a JSON structure in the following format:
 }
 ```
 
-_Note_: Ensure that the "nvidia_payload" can be verified using NVIDIA's [GPU Attestation API](https://docs.attestation.nvidia.com/api-docs/nras.html#post-/v3/attest/gpu).
+_Note_: Ensure that the "nvidia_payload" can be verified using NVIDIA's GPU Attestation API. Support for decentralized TEE attestation is planned for the future, and relevant interfaces will be provided. Stay tuned.
 
 #### 2. Signature Download Interface
 
@@ -58,8 +58,16 @@ Each response should include a unique ID that can be utilized to retrieve its si
 
 </TabItem>
 
-<TabItem value="zk" label="ZK">
-Under construction...
+<TabItem value="OpML" label="OPML">
+Coming soon
+</TabItem>
+
+<TabItem value="ZKML" label="ZKML">
+Coming soon
+</TabItem>
+
+<TabItem value="SPML" label="SPML">
+Coming soon
 </TabItem>
 </Tabs>
 
@@ -73,13 +81,7 @@ To register and manage services, handle user request proxies, and offer settleme
 
 ### Download the Installation Package
 
-[Download the Package](./data/provider-broker.tar.gz).
-
-### Extract the Installation Package
-
-```bash
-tar -zxvf provider-broker.tar.gz
-```
+Please visit the [releases page](https://github.com/0glabs/0g-serving-broker/releases) to download and extract the latest version of the installation package.
 
 ### Configuration Setup
 
@@ -100,22 +102,23 @@ docker compose -f provider-broker/docker-compose.yml up -d
 
 1. **Register the Service**
 
-   The serving system currently supports `chatbot` services, with plans to support additional types.
+   The compute network currently supports `chatbot` services. Additional services are in the pipeline to be released soon.
 
    ```bash
    curl -X POST http://127.0.0.1:3080/v1/service \
    -H "Content-Type: application/json" \
    -d '{
          "URL": "<endpoint_of_the_prepared_service>",
-         "inputPrice": 100000,
-         "outputPrice": 200000,
+         "inputPrice": "10000000",
+         "outputPrice": "20000000",
          "Type": "chatbot",
          "Name": "llama8Bb",
-         "Model": "llama-3.1-8B-Instruct"
+         "Model": "llama-3.1-8B-Instruct",
+         "verifiability":"TeeML"
    }'
    ```
 
-   - `inputPrice` and `outputPrice` vary by service type, for `chatbot`, they represent the cost per token.
+   - `inputPrice` and `outputPrice` vary by service type, for `chatbot`, they represent the cost per token. The unit is in neuron. 1 A0GI = 10^18 neuron.
 
 2. **Settle the Fee**
 
